@@ -1,72 +1,9 @@
 #!/bin/sh
-#
-# Copyright (c) 2007 Andy Parkins
-#
-# An example hook script to mail out commit update information.  This hook
-# sends emails listing new revisions to the repository introduced by the
-# change being reported.  The rule is that (for branch updates) each commit
-# will appear on one email and one email only.
-#
-# This hook is stored in the contrib/hooks directory.  Your distribution
-# will have put this somewhere standard.  You should make this script
-# executable then link to it in the repository you would like to use it in.
-# For example, on debian the hook is stored in
-# /usr/share/doc/git-core/contrib/hooks/post-receive-email:
-#
-#  chmod a+x post-receive-email
-#  cd /path/to/your/repository.git
-#  ln -sf /usr/share/doc/git-core/contrib/hooks/post-receive-email hooks/post-receive
-#
-# This hook script assumes it is enabled on the central repository of a
-# project, with all users pushing only to it and not between each other.  It
-# will still work if you don't operate in that style, but it would become
-# possible for the email to be from someone other than the person doing the
-# push.
-#
-# Config
-# ------
-# hooks.mailinglist
-#   This is the list that all pushes will go to; leave it blank to not send
-#   emails for every ref update.
-# hooks.announcelist
-#   This is the list that all pushes of annotated tags will go to.  Leave it
-#   blank to default to the mailinglist field.  The announce emails lists
-#   the short log summary of the changes since the last annotated tag.
-# hooks.envelopesender
-#   If set then the -f option is passed to sendmail to allow the envelope
-#   sender address to be set
-# hooks.emailprefix
-#   All emails have their subjects prefixed with this prefix, or "[SCM]"
-#   if emailprefix is unset, to aid filtering
-# hooks.showrev
-#   The shell command used to format each revision in the email, with
-#   "%s" replaced with the commit id.  Defaults to "git rev-list -1
-#   --pretty %s", displaying the commit id, author, date and log
-#   message.  To list full patches separated by a blank line, you
-#   could set this to "git show -C %s; echo".
-#
-# Notes
-# -----
-# All emails include the headers "X-Git-Refname", "X-Git-Oldrev",
-# "X-Git-Newrev", and "X-Git-Reftype" to enable fine tuned filtering and
-# give information for debugging.
-#
 
-# ---------------------------- Functions
 
-#
-# Top level email generation function.  This decides what type of update
-# this is and calls the appropriate body-generation routine after outputting
-# the common header
-#
-# Note this function doesn't actually generate any email output, that is
-# taken care of by the functions it calls:
-#  - generate_email_header
-#  - generate_create_XXXX_email
-#  - generate_update_XXXX_email
-#  - generate_delete_XXXX_email
-#  - generate_email_footer
-#
+# Top level generation function. This decides what type of update this is and
+# calls the appropriate body-generation routine after outputting the common
+# header
 generate_email()
 {
 	# --- Arguments
@@ -135,26 +72,17 @@ generate_email()
 			refname_type="tracking branch"
 			short_refname=${refname##refs/remotes/}
 			echo >&2 "*** Push-update of tracking branch, $refname"
-			echo >&2 "***  - no email generated."
 			exit 0
 			;;
 		*)
 			# Anything else (is there anything else?)
 			echo >&2 "*** Unknown type of update to $refname ($rev_type)"
-			echo >&2 "***  - no email generated"
 			exit 1
 			;;
 	esac
 
 
 	# Email parameters
-	# The email subject will contain the best description of the ref
-	# that we can build from the parameters
-	describe=$(git describe $rev 2>/dev/null)
-	if [ -z "$describe" ]; then
-		describe=$rev
-	fi
-
 	generate_email_header
 
 	# Call the correct body generation function
@@ -168,8 +96,6 @@ generate_email()
 		;;
 	esac
 	generate_${change_type}_${fn_name}_email
-
-	generate_email_footer
 }
 
 generate_email_header()
@@ -177,15 +103,7 @@ generate_email_header()
 	# --- Email (all stdout will be the email)
 	# Generate header
 	cat <<-EOF
-	Subject: $refname_type "$short_refname" ${change_type}d
-
-	EOF
-}
-
-generate_email_footer()
-{
-	cat <<-EOF
-
+	Subject: ${change_type}d the "$short_refname" $refname_type
 	EOF
 }
 
@@ -198,7 +116,6 @@ generate_create_branch_email()
 {
 	echo $LOGBEGIN
 	show_new_revisions
-	echo $LOGEND
 }
 
 #
@@ -282,29 +199,13 @@ generate_update_branch_email()
 	# ^N is empty.  For a non fast forward, O ^N is the list of removed
 	# revisions
 	fast_forward=""
-	rev=""
-	for rev in $(git rev-list $newrev..$oldrev)
-	do true
-	done
-	if [ -z "$rev" ]; then
-		fast_forward=1
-	fi
+	if [ -z "$(git rev-list $newrev..$oldrev)" ]; then
+	  fast_forward=1
+  fi
 
 	if [ "$fast_forward" ]; then
 		echo "Push type: fast-forward"
 	else
-		#  1. Existing revisions were removed.  In this case newrev
-		#     is a subset of oldrev - this is the reverse of a
-		#     fast-forward, a rewind
-		#  2. New revisions were added on top of an old revision,
-		#     this is a rewind and addition.
-
-		# (1) certainly happened, (2) possibly.  When (2) hasn't
-		# happened, we set a flag to indicate that no log printout
-		# is required.
-
-		# Find the common ancestor of the old and new revisions and
-		# compare it with newrev
 		baserev=$(git merge-base $oldrev $newrev)
 		rewind_only=""
 		if [ "$baserev" = "$newrev" ]; then
@@ -315,17 +216,10 @@ generate_update_branch_email()
 		fi
 	fi
 
-	echo ""
 	if [ -z "$rewind_only" ]; then
 		echo ""
 		echo $LOGBEGIN
 		show_new_revisions
-
-		# XXX: Need a way of detecting whether git rev-list actually
-		# outputted anything, so that we can issue a "no new
-		# revisions added by this update" message
-
-		echo $LOGEND
 	fi
 }
 
@@ -416,8 +310,6 @@ generate_atag_email()
 		# objects?
 		;;
 	esac
-
-	echo $LOGEND
 }
 
 #
@@ -427,9 +319,8 @@ generate_delete_atag_email()
 {
 	echo "       was  $oldrev"
 	echo ""
-	echo $LOGEND
+	echo $LOGBEGIN
 	git show -s --pretty=oneline $oldrev
-	echo $LOGEND
 }
 
 # --------------- General references
@@ -475,7 +366,6 @@ generate_general_email()
 	if [ "$newrev_type" = "commit" ]; then
 		echo $LOGBEGIN
 		git show --no-color --root -s --pretty=medium $newrev
-		echo $LOGEND
 	else
 		# What can we do here?  The tag marks an object that is not
 		# a commit, so there is no log for us to display.  It's
@@ -492,9 +382,8 @@ generate_delete_general_email()
 {
 	echo "       was  $oldrev"
 	echo ""
-	echo $LOGEND
+	echo $LOGBEGIN
 	git show -s --pretty=oneline $oldrev
-	echo $LOGEND
 }
 
 
@@ -541,8 +430,8 @@ show_new_revisions()
 # ---------------------------- main()
 
 # --- Constants
-LOGBEGIN="- Log -----------------------------------------------------------------"
-LOGEND="-----------------------------------------------------------------------"
+LOGBEGIN="Log -------------------------------------------------------------------"
+
 
 # --- Config
 # Set GIT_DIR either from the working directory, or from the environment
