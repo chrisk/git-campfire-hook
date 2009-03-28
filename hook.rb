@@ -33,10 +33,10 @@ end
 if refname =~ %r{^refs/(tags|heads|remotes)/(.+)$}
   short_refname = $2
 
-  refname_types = {%w(tags    commit)  => "tag",
-                   %w(tags    tag)     => "annotated tag",
-                   %w(heads   commit)  => "branch",
-                   %w(remotes commit)  => "tracking branch"}
+  refname_types = {%w(tags    commit) => "tag",
+                   %w(tags    tag)    => "annotated tag",
+                   %w(heads   commit) => "branch",
+                   %w(remotes commit) => "tracking branch"}
   refname_type = refname_types[[$1, rev_type]]
 end
 
