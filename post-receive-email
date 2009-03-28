@@ -57,10 +57,6 @@ generate_email()
 			# annotated tag
 			refname_type="annotated tag"
 			short_refname=${refname##refs/tags/}
-			# change recipients
-			if [ -n "$announcerecipients" ]; then
-				recipients="$announcerecipients"
-			fi
 			;;
 		refs/heads/*,commit)
 			# branch
@@ -414,16 +410,7 @@ show_new_revisions()
 	other_branches=$(git for-each-ref --format='%(refname)' refs/heads/ |
 	    grep -F -v $refname)
 	git rev-parse --not $other_branches |
-	if [ -z "$custom_showrev" ]
-	then
-    git rev-list --pretty --stdin $revspec
-	else
-		git rev-list --stdin $revspec |
-		while read onerev
-		do
-      eval $(printf "$custom_showrev" $onerev)
-		done
-	fi
+	git rev-list --pretty --stdin $revspec
 }
 
 
@@ -442,19 +429,7 @@ if [ -z "$GIT_DIR" ]; then
 	exit 1
 fi
 
-projectdesc=$(sed -ne '1p' "$GIT_DIR/description")
-# Check if the description is unchanged from it's default, and shorten it to
-# a more manageable length if it is
-if expr "$projectdesc" : "Unnamed repository.*$" >/dev/null
-then
-	projectdesc="UNNAMED PROJECT"
-fi
 
-recipients=$(git config hooks.mailinglist)
-announcerecipients=$(git config hooks.announcelist)
-envelopesender=$(git config hooks.envelopesender)
-emailprefix=$(git config hooks.emailprefix || echo '[SCM] ')
-custom_showrev=$(git config hooks.showrev)
 
 if [ "-h" = "$1" ]; then
   echo "Usage: post-receive-email ref oldrev newrev"
