@@ -41,5 +41,32 @@ if refname =~ %r{^refs/(tags|heads|remotes)/(.+)$}
 end
 
 
-puts refname_type
-puts short_refname
+
+def new_commits(change_type, refname, oldrev, newrev)
+  revision_range = (change_type == :create) ? newrev : "#{oldrev}..#{newrev}"
+
+  other_branches = `git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v #{refname}`
+  sentinel = "=-=-*-*-" * 10
+  puts `git rev-parse --not #{other_branches} | git rev-list --reverse --pretty=format:'%cn%n%s%n%n%b#{sentinel}' --stdin #{revision_range}`
+  raw_commits = `git rev-parse --not #{other_branches} | git rev-list --reverse --pretty=format:'%cn%n%s%n%n%b#{sentinel}' --stdin #{revision_range}`.split(sentinel)
+  raw_commits.pop # last is empty because there's an ending sentinel
+
+  raw_commits.inject([]) { |commits, raw_commit|
+    lines = raw_commit.strip.split("\n")
+    commits << {:revision  => lines[0].sub(/^commit /, ""),
+                :committer => lines[1],
+                :message   => lines[2..-1].join("\n")}
+  }
+end
+
+
+def speak_new_commits(commits)
+  commits.each do |c|
+    # TODO: replace puts with tinder
+    puts "#{c[:committer]} just committed #{c[:revision]}"
+    puts c[:message]
+    puts
+  end
+end
+
+speak_new_commits(new_commits(change_type, refname, oldrev, newrev))
