@@ -41,6 +41,26 @@ if refname =~ %r{^refs/(tags|heads|remotes)/(.+)$}
 end
 
 
+def update_branch(refname, oldrev, newrev)
+  if `git rev-list #{newrev}..#{oldrev}`.empty?
+    update_type = :fast_foward
+  elsif newrev == `git merge-base #{oldrev} #{newrev}`
+    update_type = :rewind
+    # TODO: say something about the rewind
+  else
+    update_type = :force
+    # TODO: say something about the force-push
+  end
+
+  unless update_type == :rewind
+    speak_new_commits(new_commits("update", refname, oldrev, newrev))
+  end
+end
+
+def create_branch(refname, oldrev, newrev)
+  # TODO: say something about the branch creation
+  speak_new_commits(new_commits("create", refname, oldrev, newrev))
+end
 
 def new_commits(change_type, refname, oldrev, newrev)
   revision_range = (change_type == :create) ? newrev : "#{oldrev}..#{newrev}"
@@ -68,4 +88,7 @@ def speak_new_commits(commits)
   end
 end
 
-speak_new_commits(new_commits(change_type, refname, oldrev, newrev))
+
+if refname_type.include?("branch")
+  send("#{change_type}_branch", refname, oldrev, newrev)
+end
