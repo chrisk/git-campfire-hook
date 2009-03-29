@@ -90,7 +90,7 @@ class GitCampfireNotification
       update_type = :fast_foward
     elsif newrev == `git merge-base #{@old_revision} #{@new_revision}`
       update_type = :rewind
-      puts "Notce: the #{project_name}/#{short_ref_name} branch was just rewound"
+      puts "Notice: the #{project_name}/#{short_ref_name} branch was just rewound to a previous commit"
     else
       update_type = :force
       puts "Notice: the #{project_name}/#{short_ref_name} branch was just force-updated"
