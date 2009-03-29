@@ -47,7 +47,6 @@ def new_commits(change_type, refname, oldrev, newrev)
 
   other_branches = `git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v #{refname}`
   sentinel = "=-=-*-*-" * 10
-  puts `git rev-parse --not #{other_branches} | git rev-list --reverse --pretty=format:'%cn%n%s%n%n%b#{sentinel}' --stdin #{revision_range}`
   raw_commits = `git rev-parse --not #{other_branches} | git rev-list --reverse --pretty=format:'%cn%n%s%n%n%b#{sentinel}' --stdin #{revision_range}`.split(sentinel)
   raw_commits.pop # last is empty because there's an ending sentinel
 
