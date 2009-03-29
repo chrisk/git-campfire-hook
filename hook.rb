@@ -23,6 +23,8 @@ class GitCampfireNotification
 
     if ref_name_type.include?("branch")
       send "#{change_type}_branch"
+    elsif ref_name_type.include?("tag")
+      send "#{change_type}_tag"
     end
   end
 
