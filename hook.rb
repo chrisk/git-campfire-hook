@@ -78,9 +78,8 @@ class GitCampfireNotification
 
   def speak_new_commits
     new_commits.each do |c|
-      # TODO: replace puts with tinder
       puts "#{c[:committer]} just committed #{c[:revision]}"
-      puts c[:message]
+      puts "[#{project_name}] #{c[:message]}"
       puts
     end
   end
