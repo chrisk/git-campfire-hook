@@ -22,7 +22,7 @@ class GitCampfireNotification
     @new_revision_type = `git cat-file -t #{newrev} 2> /dev/null`.strip
 
     if ref_name_type.include?("branch")
-      send("create_branch", refname, oldrev, newrev)
+      send "#{change_type}_branch"
     end
   end
 
@@ -102,7 +102,7 @@ class GitCampfireNotification
     end
   end
 
-  def create_branch(refname, oldrev, newrev)
+  def create_branch
     puts "A new branch was just pushed to #{project_name}/#{short_ref_name}:"
     speak_new_commits
   end
