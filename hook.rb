@@ -106,6 +106,9 @@ class GitCampfireNotification
     speak_new_commits
   end
 
+  def delete_branch
+    puts "The remote branch #{project_name}/#{short_ref_name} was just deleted"
+  end
 end
 
 
