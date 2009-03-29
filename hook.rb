@@ -109,6 +109,10 @@ class GitCampfireNotification
   def delete_branch
     puts "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
+
+  def delete_tag
+    puts "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+  end
 end
 
 
