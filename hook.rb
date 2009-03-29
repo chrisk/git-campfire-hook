@@ -90,10 +90,10 @@ class GitCampfireNotification
       update_type = :fast_foward
     elsif newrev == `git merge-base #{@old_revision} #{@new_revision}`
       update_type = :rewind
-      puts "Notice: the #{project_name}/#{short_ref_name} branch was just rewound to a previous commit"
+      puts "Notice: the #{project_name}/#{short_ref_name} #{ref_name_type} was just rewound to a previous commit"
     else
       update_type = :force
-      puts "Notice: the #{project_name}/#{short_ref_name} branch was just force-updated"
+      puts "Notice: the #{project_name}/#{short_ref_name} #{ref_name_type} was just force-updated"
     end
 
     unless update_type == :rewind
@@ -102,12 +102,12 @@ class GitCampfireNotification
   end
 
   def create_branch
-    puts "A new branch was just pushed to #{project_name}/#{short_ref_name}:"
+    puts "A new #{ref_name_type} was just pushed to #{project_name}/#{short_ref_name}:"
     speak_new_commits
   end
 
   def delete_branch
-    puts "The remote branch #{project_name}/#{short_ref_name} was just deleted"
+    puts "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
 end
 
