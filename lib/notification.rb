@@ -1,17 +1,3 @@
-#!/usr/bin/env ruby
-
-if ARGV.length != 3
-  puts "Usage:  #{$0} ref oldrev newrev"
-  exit
-end
-
-refname = ARGV[0]
-oldrev  = `git rev-parse #{ARGV[1]}`.strip
-newrev  = `git rev-parse #{ARGV[2]}`.strip
-
-
-
-
 class GitCampfireNotification
 
   def initialize(refname, oldrev, newrev)
@@ -116,7 +102,3 @@ class GitCampfireNotification
     puts "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
 end
-
-
-
-GitCampfireNotification.new(refname, oldrev, newrev)
