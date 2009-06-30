@@ -14,6 +14,11 @@ class TestNotifications < Test::Unit::TestCase
           hook.puts "done"
           hook.chmod(0777)
         end
+        `git config hooks.campfire.subdomain example`
+        `git config hooks.campfire.email login@example.com`
+        `git config hooks.campfire.password secret`
+        `git config hooks.campfire.ssl true`
+        `git config hooks.campfire.room Watercooler`
       end
       FileUtils.cd WORKING_REPO_DIR do
         `git init`

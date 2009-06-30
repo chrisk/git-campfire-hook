@@ -1,11 +1,19 @@
+require 'rubygems'
+require 'tinder'
+
 class GitCampfireNotification
 
-  def initialize(refname, oldrev, newrev)
-    @ref_name     = refname
-    @old_revision = oldrev
-    @new_revision = newrev
-    @old_revision_type = `git cat-file -t #{oldrev} 2> /dev/null`.strip
-    @new_revision_type = `git cat-file -t #{newrev} 2> /dev/null`.strip
+  def initialize(options = {})
+    # campfire_config keys: subdomain, use_ssl, email, password, room
+    @campfire_config = options[:campfire_config]
+
+    # git keys: ref_name, old_revision, new_revision
+    @ref_name     = options[:ref_name]
+    @old_revision = options[:old_revision]
+    @new_revision = options[:new_revision]
+
+    @old_revision_type = `git cat-file -t #{@old_revision} 2> /dev/null`.strip
+    @new_revision_type = `git cat-file -t #{@new_revision} 2> /dev/null`.strip
 
     if ref_name_type.include?("branch")
       send "#{change_type}_branch"
@@ -14,6 +22,13 @@ class GitCampfireNotification
     end
   end
 
+  def campfire_room
+    if @campfire.nil?
+      @campfire = Tinder::Campfire.new(@campfire_config[:subdomain], :ssl => @campfire_config[:use_ssl])
+      @campfire.login(@campfire_config[:email], @campfire_config[:password])
+    end
+    @campfire_room ||= @campfire.find_room_by_name(@campfire_config[:room])
+  end
 
   def project_name
     project_name = `git rev-parse --git-dir 2>/dev/null`.strip
@@ -66,9 +81,8 @@ class GitCampfireNotification
 
   def speak_new_commits
     new_commits.each do |c|
-      puts "#{c[:committer]} just committed #{c[:revision]}"
-      puts "[#{project_name}] #{c[:message]}"
-      puts
+      campfire_room.speak "#{c[:committer]} just committed #{c[:revision]}"
+      campfire_room.paste "[#{project_name}] #{c[:message]}"
     end
   end
 
@@ -78,10 +92,10 @@ class GitCampfireNotification
       update_type = :fast_foward
     elsif newrev == `git merge-base #{@old_revision} #{@new_revision}`
       update_type = :rewind
-      puts "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
+      campfire_room.speak "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
     else
       update_type = :force
-      puts "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
+      campfire_room.speak "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
     end
 
     unless update_type == :rewind
@@ -90,15 +104,15 @@ class GitCampfireNotification
   end
 
   def create_branch
-    puts "A new remote #{ref_name_type} was just pushed to #{project_name}/#{short_ref_name}:"
+    campfire_room.speak "A new remote #{ref_name_type} was just pushed to #{project_name}/#{short_ref_name}:"
     speak_new_commits
   end
 
   def delete_branch
-    puts "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+    campfire_room.speak "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
 
   def delete_tag
-    puts "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+    campfire_room.speak "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
 end
