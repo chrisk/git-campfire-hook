@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require File.join(File.dirname(__FILE__), 'notification')
-require 'yaml'
 
 if ARGV.length != 3
   puts "Usage:  #{$0} ref oldrev newrev"
