@@ -84,8 +84,8 @@ class GitCampfireNotification
 
   def speak_new_commits
     new_commits.each do |c|
-      campfire_room.speak "#{c[:committer]} just committed #{c[:revision]}"
-      campfire_room.paste "[#{project_name}] #{c[:message]}"
+      say "#{c[:committer]} just committed #{c[:revision]}"
+      say "[#{project_name}] #{c[:message]}", :paste
     end
   end
 
@@ -95,10 +95,10 @@ class GitCampfireNotification
       update_type = :fast_foward
     elsif newrev == `git merge-base #{@old_revision} #{@new_revision}`
       update_type = :rewind
-      campfire_room.speak "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
+      say "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
     else
       update_type = :force
-      campfire_room.speak "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
+      say "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
     end
 
     unless update_type == :rewind
@@ -107,15 +107,20 @@ class GitCampfireNotification
   end
 
   def create_branch
-    campfire_room.speak "A new remote #{ref_name_type} was just pushed to #{project_name}/#{short_ref_name}:"
+    say "A new remote #{ref_name_type} was just pushed to #{project_name}/#{short_ref_name}:"
     speak_new_commits
   end
 
   def delete_branch
-    campfire_room.speak "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+    say "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
   end
 
   def delete_tag
-    campfire_room.speak "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+    say "The #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+  end
+
+  def say(what, paste = false)
+    speak_or_paste = paste ? :paste : :speak
+    campfire_room.send(speak_or_paste, what)
   end
 end
