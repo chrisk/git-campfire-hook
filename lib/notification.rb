@@ -120,7 +120,10 @@ class GitCampfireNotification
   end
 
   def say(what, paste = false)
-    speak_or_paste = paste ? :paste : :speak
-    campfire_room.send(speak_or_paste, what)
+    if paste
+      campfire_room.paste what
+    else
+      campfire_room.speak what
+    end
   end
 end
