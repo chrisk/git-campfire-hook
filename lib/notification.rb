@@ -22,6 +22,9 @@ class GitCampfireNotification
     end
   end
 
+
+  private
+
   def campfire_room
     if @campfire.nil?
       @campfire = Tinder::Campfire.new(@campfire_config[:subdomain], :ssl => @campfire_config[:use_ssl])
