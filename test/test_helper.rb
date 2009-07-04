@@ -2,6 +2,7 @@ require 'rubygems'
 require 'test/unit'
 require 'shoulda'
 
+ENV["USE_STDOUT"] = "1"
 
 module GitCampfireHookTestHelper
 

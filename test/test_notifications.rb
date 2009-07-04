@@ -28,7 +28,8 @@ class TestNotifications < Test::Unit::TestCase
         FileUtils.touch "README"
         `git add README`
         `git commit -m 'Add empty README'`
-        `git push origin master 2> /dev/null` # git-push writes to stderr for some reason
+        @output = `git push origin master 2>&1`  # git-push outputs to stderr for some reason
+        @output = @output.select { |line| line =~ /^\[campfire( p)?\] / }.map { |line| line.sub(/^\[campfire( p)?\] /, "").strip }
       end
     end
 
@@ -36,9 +37,11 @@ class TestNotifications < Test::Unit::TestCase
       FileUtils.rm_rf TMP_DIR
     end
 
-    should "print 'A new remote branch was just pushed to testrepo/master'"
-    should "print 'Arthur Author just committed 4cedf3f1bbe4a74d05998f960eaf64c735b0dc47'"
-    should "print '[testrepo] Add empty README'"
+    should "announce that a new remote branch was pushed, and the details of the first commit" do
+      assert_equal "A new remote branch was just pushed to testrepo/master:", @output[0]
+      assert_match /^Arthur Author just committed [0-9a-f]{40}$/, @output[1]
+      assert_equal "[testrepo] Add empty README", @output[2]
+    end
   end
 
 end

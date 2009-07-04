@@ -34,7 +34,7 @@ class GitCampfireNotification
   end
 
   def project_name
-    project_name = `git rev-parse --git-dir 2>/dev/null`.strip
+    project_name = File.expand_path(`git rev-parse --git-dir 2>/dev/null`.strip).split("/").last
     if project_name == ".git"
       project_name = File.basename(Dir.pwd)
     end
@@ -120,10 +120,11 @@ class GitCampfireNotification
   end
 
   def say(what, paste = false)
-    if paste
-      campfire_room.paste what
+    if ENV["USE_STDOUT"]
+      paste ? $stdout.puts("[campfire p] #{what}") : $stdout.puts("[campfire] #{what}")
     else
-      campfire_room.speak what
+      paste ? campfire_room.paste(what) : campfire_room.speak(what)
     end
   end
+
 end
