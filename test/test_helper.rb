@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'shoulda'
+require 'fileutils'
 
 ENV["USE_STDOUT"] = "1"
 
