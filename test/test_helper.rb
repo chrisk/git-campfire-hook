@@ -28,13 +28,14 @@ end
 module GitCampfireHookShouldaMacros
 
   def filter_output(output)
-    output.select { |line| line =~ /^\[campfire( p)?\] / }.map { |line| line.strip }
+    lines = output.split("\n")
+    lines.select { |line| line =~ /^\[campfire( p)?\] / }.map { |line| line.strip }
   end
 
   def should_say(what)
     should "say #{what.inspect}" do
-      output = self.class.filter_output(@output)
-      matching_line = output.select { |line|
+      lines = self.class.filter_output(@output)
+      matching_line = lines.select { |line|
         filtered_line = line.sub(/^\[campfire\] /, '')
         line =~ /^\[campfire\] / && (what.is_a?(Regexp) ? (line =~ what) : (line == what.to_s))
       }
@@ -44,8 +45,8 @@ module GitCampfireHookShouldaMacros
 
   def should_paste(what)
     should "paste #{what.inspect}" do
-      output = self.class.filter_output(@output)
-      matching_line = output.select { |line|
+      lines = self.class.filter_output(@output)
+      matching_line = lines.select { |line|
         filtered_line = line.sub(/^\[campfire p\] /, '')
         line =~ /^\[campfire p\] / && (what.is_a?(Regexp) ? (line =~ what) : (line == what.to_s))
       }
