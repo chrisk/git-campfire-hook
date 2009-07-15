@@ -93,7 +93,7 @@ class GitCampfireNotification
   def update_branch
     if `git rev-list #{@new_revision}..#{@old_revision}`.empty?
       update_type = :fast_foward
-    elsif newrev == `git merge-base #{@old_revision} #{@new_revision}`
+    elsif @new_revision == `git merge-base #{@old_revision} #{@new_revision}`
       update_type = :rewind
       say "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
     else
