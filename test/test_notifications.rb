@@ -22,6 +22,7 @@ class TestNotifications < Test::Unit::TestCase
       should_say   "A new remote branch was just pushed to testrepo/master:"
       should_say   lambda { %r|^Arthur Author just committed #{@shas[0]}$| }
       should_paste "[testrepo] Add empty README"
+      should_have_lines_of_output 3
     end
 
 
@@ -45,6 +46,7 @@ class TestNotifications < Test::Unit::TestCase
       should_paste "[testrepo] Add empty README"
       should_say   lambda { %r|^Arthur Author just committed #{@shas[1]}$| }
       should_paste "[testrepo] Add title to README"
+      should_have_lines_of_output 5
     end
 
   end

@@ -85,6 +85,12 @@ module GitCampfireHookShouldaMacros
     end
   end
 
+  def should_have_lines_of_output(how_many)
+    should "have #{how_many} lines of output" do
+      lines = self.class.filter_output(@output)
+      assert_equal how_many, lines.size
+    end
+  end
 end
 
 Test::Unit::TestCase.send(:include, GitCampfireHookTestHelper)
