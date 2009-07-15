@@ -50,6 +50,15 @@ module GitCampfireHookTestHelper
     end
   end
 
+  def commit_empty_readme_and_push
+    FileUtils.cd WORKING_REPO_DIR do
+      FileUtils.touch "README"
+      `git add README`
+      `git commit -m 'Add empty README'`
+      `git push origin master 2>&1`
+    end
+  end
+
   def delete_git_repos
     FileUtils.rm_rf TMP_DIR
   end
