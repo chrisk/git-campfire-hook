@@ -14,13 +14,13 @@ class TestNotifications < Test::Unit::TestCase
           FileUtils.touch "README"
           `git add README`
           `git commit -m 'Add empty README'`
-          @shas = `git rev-list --all`.split
+          @sha = `git rev-list --all`.strip
           @output = `git push origin master 2>&1`
         end
       end
 
       should_say   "A new remote branch was just pushed to testrepo/master:"
-      should_say   lambda { %r|^Arthur Author just committed #{@shas[0]}$| }
+      should_say   lambda { %r|^Arthur Author just committed #{@sha}$| }
       should_paste "[testrepo] Add empty README"
       should_have_lines_of_output 3
     end
@@ -32,9 +32,7 @@ class TestNotifications < Test::Unit::TestCase
           FileUtils.touch "README"
           `git add README`
           `git commit -m 'Add empty README'`
-          File.open("README", 'a') do |file|
-            file.puts 'Best project ever'
-          end
+          File.open("README", 'a') { |file| file.puts 'Best project ever' }
           `git commit -a -m 'Add title to README'`
           @shas = `git rev-list --all`.split
           @output = `git push origin master 2>&1`
