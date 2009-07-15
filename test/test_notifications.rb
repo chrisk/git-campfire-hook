@@ -83,6 +83,21 @@ class TestNotifications < Test::Unit::TestCase
       should_paste "[testrepo] Add README with title"
       should_have_lines_of_output 3
     end
+
+    context "with the previous HEAD removed (rewind)" do
+      setup do
+        FileUtils.cd WORKING_REPO_DIR do
+          File.open("README", 'a') { |file| file.puts 'Best project ever' }
+          `git commit -a -m 'Add title to README'`
+          `git push origin master 2>&1`
+          `git reset --hard HEAD^`
+          @output = `git push -f origin master 2>&1`
+        end
+      end
+
+      should_say   "Notice: the remote branch testrepo/master was just rewound to a previous commit"
+      should_have_lines_of_output 1
+    end
   end
 
 end
