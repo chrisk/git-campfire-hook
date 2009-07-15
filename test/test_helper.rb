@@ -74,6 +74,7 @@ module GitCampfireHookShouldaMacros
 
   def should_output(what, paste = false)
     should "#{paste ? 'paste' : 'say'} #{what.inspect}" do
+      what = what.bind(self).call if what.respond_to?(:call)
       output_marker = paste ? 'campfire p' : 'campfire'
       lines = self.class.filter_output(@output)
       matching_line = lines.detect { |line|
