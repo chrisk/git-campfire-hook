@@ -33,22 +33,20 @@ module GitCampfireHookShouldaMacros
   end
 
   def should_say(what)
-    should "say #{what.inspect}" do
-      lines = self.class.filter_output(@output)
-      matching_line = lines.select { |line|
-        filtered_line = line.sub(/^\[campfire\] /, '')
-        line =~ /^\[campfire\] / && (what.is_a?(Regexp) ? (line =~ what) : (line == what.to_s))
-      }
-      assert_not_nil matching_line
-    end
+    should_output(what)
   end
 
   def should_paste(what)
-    should "paste #{what.inspect}" do
+    should_output(what, :paste)
+  end
+
+  def should_output(what, paste = false)
+    should "#{paste ? 'paste' : 'say'} #{what.inspect}" do
+      output_marker = paste ? 'campfire p' : 'campfire'
       lines = self.class.filter_output(@output)
-      matching_line = lines.select { |line|
-        filtered_line = line.sub(/^\[campfire p\] /, '')
-        line =~ /^\[campfire p\] / && (what.is_a?(Regexp) ? (line =~ what) : (line == what.to_s))
+      matching_line = lines.detect { |line|
+        content = line.sub(/^\[#{output_marker}\] /, '')
+        line =~ /^\[#{output_marker}\] / && (what.is_a?(Regexp) ? (content =~ what) : (content == what))
       }
       assert_not_nil matching_line
     end
