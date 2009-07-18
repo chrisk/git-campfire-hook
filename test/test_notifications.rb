@@ -95,9 +95,26 @@ class TestNotifications < Test::Unit::TestCase
         end
       end
 
-      should_say   "Notice: the remote branch testrepo/master was just rewound to a previous commit"
+      should_say "Notice: the remote branch testrepo/master was just rewound to a previous commit"
       should_have_lines_of_output 1
     end
+  end
+
+
+  context "receiving a push that deletes a branch" do
+    setup do
+      setup_bare_repo_with_hook
+      setup_working_repo_with_bare_as_origin
+      commit_empty_readme_and_push
+      FileUtils.cd WORKING_REPO_DIR do
+        @output = `git push origin :master 2>&1`
+      end
+    end
+
+    teardown { delete_git_repos }
+
+    should_say "The remote branch testrepo/master was just deleted"
+    should_have_lines_of_output 1
   end
 
 end
