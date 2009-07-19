@@ -90,7 +90,7 @@ module GitCampfireHookShouldaMacros
         content = line.sub(/^\[#{output_marker}\] /, '')
         line =~ /^\[#{output_marker}\] / && (what.is_a?(Regexp) ? (content =~ what) : (content == what))
       }
-      assert_not_nil matching_line
+      assert_not_nil matching_line, %Q(Actual output:\n#{lines.join("\n")})
     end
   end
 
