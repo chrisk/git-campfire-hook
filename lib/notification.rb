@@ -95,10 +95,10 @@ class GitCampfireNotification
       update_type = :fast_foward
     elsif @new_revision == `git merge-base #{@old_revision} #{@new_revision}`.strip
       update_type = :rewind
-      say "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
+      say "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just rewound to a previous commit"
     else
       update_type = :force
-      say "Notice: the remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
+      say "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just force-updated"
     end
 
     unless update_type == :rewind

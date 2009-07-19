@@ -78,7 +78,7 @@ class TestNotifications < Test::Unit::TestCase
         end
       end
 
-      should_say   "Notice: the remote branch testrepo/master was just force-updated"
+      should_say   "The remote branch testrepo/master was just force-updated"
       should_say   lambda { %r|^Arthur Author just committed #{@sha}$| }
       should_paste "[testrepo] Add README with title"
       should_have_lines_of_output 3
@@ -95,7 +95,7 @@ class TestNotifications < Test::Unit::TestCase
         end
       end
 
-      should_say "Notice: the remote branch testrepo/master was just rewound to a previous commit"
+      should_say "The remote branch testrepo/master was just rewound to a previous commit"
       should_have_lines_of_output 1
     end
   end
