@@ -18,7 +18,7 @@ class GitCampfireNotification
     if ref_name_type.include?("branch")
       send "#{change_type}_branch"
     elsif ref_name_type.include?("tag")
-      send "#{change_type}_tag"
+      send "create_#{ref_name_type.gsub(' ', '_')}"
     end
   end
 
@@ -57,7 +57,7 @@ class GitCampfireNotification
 
   def ref_name_type
     rev_type = (change_type == :delete) ? @old_revision_type : @new_revision_type
-    ref_name_types = {%w(tags    commit) => "tag",
+    ref_name_types = {%w(tags    commit) => "lightweight tag",
                       %w(tags    tag)    => "annotated tag",
                       %w(heads   commit) => "branch",
                       %w(remotes commit) => "tracking branch"}
@@ -113,6 +113,17 @@ class GitCampfireNotification
 
   def delete_branch
     say "The remote #{ref_name_type} #{project_name}/#{short_ref_name} was just deleted"
+  end
+
+  def create_lightweight_tag
+    sha = `git rev-parse #{short_ref_name}`
+    say "A new lightweight tag was just pushed; #{project_name}/#{short_ref_name} is #{sha[0...8]}"
+  end
+
+  def create_annotated_tag
+    sha = `git rev-parse #{short_ref_name}`
+    say "A new annotated tag was just pushed; #{project_name}/#{short_ref_name} now points to #{sha[0...8]}:"
+    # TODO: say tag message
   end
 
   def delete_tag

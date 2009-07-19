@@ -117,4 +117,41 @@ class TestNotifications < Test::Unit::TestCase
     should_have_lines_of_output 1
   end
 
+
+  context "receiving a push that includes a new annotated tag" do
+    setup do
+      setup_bare_repo_with_hook
+      setup_working_repo_with_bare_as_origin
+      commit_empty_readme_and_push
+      FileUtils.cd WORKING_REPO_DIR do
+        `git tag -a first_release -m "Tag first release" HEAD`
+        @sha = `git rev-parse first_release`.strip
+        @output = `git push --tags 2>&1`
+      end
+    end
+
+    teardown { delete_git_repos }
+
+    should_say lambda { "A new annotated tag was just pushed; testrepo/first_release now points to #{@sha[0...8]}:" }
+    should_have_lines_of_output 1
+  end
+
+
+  context "receiving a push that includes a new lightweight tag" do
+    setup do
+      setup_bare_repo_with_hook
+      setup_working_repo_with_bare_as_origin
+      commit_empty_readme_and_push
+      FileUtils.cd WORKING_REPO_DIR do
+        `git tag first_release master`
+        @sha = `git rev-parse first_release`.strip
+        @output = `git push --tags 2>&1`
+      end
+    end
+
+    teardown { delete_git_repos }
+
+    should_say lambda { "A new lightweight tag was just pushed; testrepo/first_release is #{@sha[0...8]}" }
+    should_have_lines_of_output 1
+  end
 end
