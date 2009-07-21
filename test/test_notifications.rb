@@ -132,8 +132,9 @@ class TestNotifications < Test::Unit::TestCase
 
     teardown { delete_git_repos }
 
-    should_say lambda { "A new annotated tag was just pushed; testrepo/first_release now points to #{@sha[0...8]}:" }
-    should_have_lines_of_output 1
+    should_say   lambda { "Arthur Author just pushed a new annotated tag, testrepo/first_release points to #{@sha[0...8]}:" }
+    should_paste "[testrepo] Tag first release"
+    should_have_lines_of_output 2
   end
 
 
@@ -154,4 +155,5 @@ class TestNotifications < Test::Unit::TestCase
     should_say lambda { "A new lightweight tag was just pushed; testrepo/first_release is #{@sha[0...8]}" }
     should_have_lines_of_output 1
   end
+
 end

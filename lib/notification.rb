@@ -121,9 +121,14 @@ class GitCampfireNotification
   end
 
   def create_annotated_tag
-    sha = `git rev-parse #{short_ref_name}`
-    say "A new annotated tag was just pushed; #{project_name}/#{short_ref_name} now points to #{sha[0...8]}:"
-    # TODO: say tag message
+    sentinel = "=-=-*-*-" * 10
+    raw_commits = `git show --pretty=format:'#{sentinel}' #{short_ref_name}`.split(sentinel)
+    tagger     = raw_commits.first.split("\n")[1][/^Tagger: (.+) </, 1]
+    annotation = raw_commits.first.split("\n")[4]
+    sha        = `git rev-parse #{short_ref_name}`
+
+    say "#{tagger} just pushed a new annotated tag, #{project_name}/#{short_ref_name} points to #{sha[0...8]}:"
+    say "[#{project_name}] #{annotation}", :paste
   end
 
   def delete_tag
