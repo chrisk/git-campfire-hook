@@ -70,6 +70,7 @@ class GitCampfireNotification
     revision_range = (change_type == :create) ? @new_revision : "#{@old_revision}..#{@new_revision}"
 
     other_branches = `git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v #{@ref_name}`
+    other_branches.gsub!("\n", " ") # We don't want newlines in the arguments for git rev-parse
     sentinel = "=-=-*-*-" * 10
     raw_commits = `git rev-parse --not #{other_branches} | git rev-list --reverse --pretty=format:'%cn%n%s%n%n%b#{sentinel}' --stdin #{revision_range}`.split(sentinel)
     raw_commits.pop # last is empty because there's an ending sentinel
