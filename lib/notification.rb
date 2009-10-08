@@ -121,10 +121,9 @@ class GitCampfireNotification
   end
 
   def create_annotated_tag
-    sentinel = "=-=-*-*-" * 10
-    raw_commits = `git show --pretty=format:'#{sentinel}' #{short_ref_name}`.split(sentinel)
-    tagger     = raw_commits.first.split("\n")[1][/^Tagger: (.+) </, 1]
-    annotation = raw_commits.first.split("\n")[4]
+    raw_commit = `git show --pretty=medium #{short_ref_name}`
+    tagger     = raw_commit[/\nTagger: (.+) <[^>]+>\n/, 1]
+    annotation = raw_commit[/\n\n(.+)\n\ncommit [0-9a-f]{40}\n/, 1]
     sha        = `git rev-parse #{short_ref_name}`
 
     say "#{tagger} just pushed a new annotated tag, #{project_name}/#{short_ref_name} points to #{sha[0...8]}:"
