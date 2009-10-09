@@ -3,6 +3,8 @@ require 'test/unit'
 require 'shoulda'
 require 'fileutils'
 
+gem 'tinder'
+
 ENV["USE_STDOUT"] = "1"
 
 module GitCampfireHookTestHelper
