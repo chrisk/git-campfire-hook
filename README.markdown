@@ -5,15 +5,18 @@ Making a better git post-receive Campfire hook. Most of them seem like they were
 hacked over from old svn hooks--ours certainly is--and they don't handle edge
 cases and branches well.
 
+
 Installation
 ============
 
-Initiated from the post-recieve hook.
-
-Example `repository/.git/hooks/post-receive`-script, with hook.rb and 
-notification.rb placed in the hooks-directory, make sure the post-receive
-file is executable.
+To install, run `hook.rb` from your repository's post-receive hook. The hook
+should contain something like this:
 
     while read old_rev new_rev ref; do
-            ruby hooks/hook.rb $ref $old_rev $new_rev
+      ruby hooks/hook.rb $ref $old_rev $new_rev
     done
+
+Make sure the `post-receive` script is executable (otherwise it'll be ignored by
+git).
+
+TODO: Add notes on configuring the git repository with Campfire settings.
