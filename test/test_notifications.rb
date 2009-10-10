@@ -46,6 +46,24 @@ class TestNotifications < Test::Unit::TestCase
         should_paste "[testrepo] Add title to README"
         should_have_lines_of_output 5
       end
+
+      context "when another branch already exists" do
+        setup do
+          commit_empty_readme_and_push
+          FileUtils.cd WORKING_REPO_DIR do
+            `git checkout -b new_branch 2>&1`
+            File.open("README", 'a') { |file| file.puts 'on new_branch' }
+            `git commit -a -m 'Update README'`
+            @sha = `git rev-list master..new_branch`.strip
+            @output = `git push origin new_branch 2>&1`
+          end
+        end
+
+        should_say   "A new remote branch was just pushed to testrepo/new_branch:"
+        should_say   lambda { %r|^Arthur Author just committed #{@sha}$| }
+        should_paste "[testrepo] Update README"
+        should_have_lines_of_output 3
+      end
     end
 
 
